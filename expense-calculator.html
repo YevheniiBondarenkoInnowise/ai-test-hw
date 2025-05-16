@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Expense Calculator</title>
+  <style>
+    body { font-family: sans-serif; max-width: 500px; margin: 40px auto; }
+    table { width: 100%; border-collapse: collapse; margin-bottom: 1em; }
+    th, td { padding: 0.5em; text-align: left; }
+    input[type="text"], input[type="number"] { width: 90%; }
+    button { margin: 0.2em; }
+    .results { margin-top: 1em; padding: 1em; border: 1px solid #ccc; }
+  </style>
+</head>
+<body>
+  <h2>Expense Calculator</h2>
+  <table id="expenseTable">
+    <thead>
+      <tr>
+        <th>Category</th>
+        <th>Amount ($)</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody id="expenseBody">
+      <!-- Expense rows go here -->
+    </tbody>
+  </table>
+  <button onclick="addRow()">Add Expense</button>
+  <button onclick="calculateExpenses()">Calculate</button>
+
+  <div class="results" id="results" style="display:none"></div>
+
+  <script>
+    // Add a new expense row to the table
+    function addRow(category = '', amount = '') {
+      const tbody = document.getElementById('expenseBody');
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td><input type="text" placeholder="Category" value="${category}"></td>
+        <td><input type="number" min="0" step="0.01" placeholder="Amount" value="${amount}"></td>
+        <td><button onclick="this.closest('tr').remove()">Remove</button></td>
+      `;
+      tbody.appendChild(row);
+    }
+
+    // Add one empty row by default
+    if (document.getElementById('expenseBody').children.length === 0) addRow();
+
+    // Calculate and display results
+    function calculateExpenses() {
+      const rows = document.querySelectorAll('#expenseBody tr');
+      const expenses = [];
+      rows.forEach(row => {
+        const category = row.querySelector('input[type="text"]').value.trim();
+        const amount = parseFloat(row.querySelector('input[type="number"]').value);
+        if (category && !isNaN(amount) && amount >= 0) {
+          expenses.push({ category, amount });
+        }
+      });
+
+      const total = expenses.reduce((sum, e) => sum + e.amount, 0);
+      const avgDaily = total / 30;
+      const top3 = [...expenses].sort((a, b) => b.amount - a.amount).slice(0, 3);
+
+      let html = `<strong>Total Expenses:</strong> $${total.toFixed(2)}<br>`;
+      html += `<strong>Average Daily Expense:</strong> $${avgDaily.toFixed(2)}<br>`;
+      html += `<strong>Top 3 Highest Expenses:</strong><ol>`;
+      top3.forEach(e => {
+        html += `<li>${e.category}: $${e.amount.toFixed(2)}</li>`;
+      });
+      html += `</ol>`;
+
+      const resultsDiv = document.getElementById('results');
+      resultsDiv.innerHTML = html;
+      resultsDiv.style.display = 'block';
+    }
+  </script>
+</body>
+</html> 
